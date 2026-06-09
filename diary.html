@@ -16,6 +16,16 @@
       <a href="diary.html" class="app-nav-link active">读书日记</a>
     </nav>
 
+    <section class="data-bar" aria-label="数据管理">
+      <span class="data-bar-label">数据</span>
+      <button type="button" class="btn btn-ghost btn-sm" id="exportAllBtn">导出全部</button>
+      <label class="btn btn-ghost btn-sm import-label">
+        导入全部
+        <input type="file" id="importAllInput" accept=".json,application/json" hidden>
+      </label>
+      <p class="data-bar-hint">保存书籍或日记时会自动下载备份；修改标签颜色 3 秒内合并为一次</p>
+    </section>
+
     <header class="header">
       <div class="header-inner">
         <div class="brand">
@@ -122,6 +132,24 @@
     </div>
   </dialog>
 
+  <!-- Import Modal -->
+  <dialog class="modal" id="importModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>导入数据</h3>
+        <button type="button" class="btn-close" data-close-import aria-label="关闭">&times;</button>
+      </div>
+      <p class="import-summary" id="importSummary"></p>
+      <p class="field-hint">合并：相同 ID 以导入文件为准；覆盖：完全替换当前数据。</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close-import>取消</button>
+        <button type="button" class="btn btn-ghost" id="importMergeBtn">合并</button>
+        <button type="button" class="btn btn-danger" id="importReplaceBtn">覆盖</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="storage.js"></script>
   <script src="tags.js"></script>
   <script src="diary.js"></script>
 </body>

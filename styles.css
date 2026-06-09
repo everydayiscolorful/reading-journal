@@ -1076,6 +1076,42 @@ body {
   color: #fff;
 }
 
+.data-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.data-bar-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.data-bar-hint {
+  margin: 0;
+  flex: 1 1 220px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.import-label {
+  cursor: pointer;
+  margin: 0;
+}
+
+.import-summary {
+  margin: 0 0 12px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
 /* Diary page */
 .diary-filter-bar input[type="search"],
 .diary-filter-bar input[type="month"] {

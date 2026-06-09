@@ -91,6 +91,7 @@ function loadTagColors() {
 }
 
 function saveTagColors() {
+  ReadingJournalStorage.autoBackupBeforeSave();
   localStorage.setItem(TAG_COLORS_STORAGE_KEY, JSON.stringify(tagColors));
 }
 
@@ -304,6 +305,7 @@ function applySortOrder(container) {
 }
 
 function saveBooks() {
+  ReadingJournalStorage.autoBackupBeforeSave({ force: true });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
 }
 

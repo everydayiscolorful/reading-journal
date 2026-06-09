@@ -37,6 +37,7 @@ function loadData() {
 }
 
 function saveDiaries() {
+  ReadingJournalStorage.autoBackupBeforeSave({ force: true });
   localStorage.setItem(DIARY_STORAGE_KEY, JSON.stringify(diaries));
 }
 
