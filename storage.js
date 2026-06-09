@@ -8,9 +8,6 @@ const ReadingJournalStorage = (() => {
   };
 
   const AUTO_BACKUP_FILENAME = 'reading-journal-auto-backup.json';
-
-  const AUTO_BACKUP_MIN_INTERVAL_MS = 3000;
-  let lastAutoBackupAt = 0;
   let pendingImportPayload = null;
 
   function readJson(key, fallback) {
@@ -80,12 +77,8 @@ const ReadingJournalStorage = (() => {
     URL.revokeObjectURL(url);
   }
 
-  function autoBackupBeforeSave({ force = false } = {}) {
+  function autoBackupAfterSave() {
     if (!isAutoBackupEnabled()) return;
-
-    const now = Date.now();
-    if (!force && now - lastAutoBackupAt < AUTO_BACKUP_MIN_INTERVAL_MS) return;
-    lastAutoBackupAt = now;
     downloadJson(buildExportPayload(), AUTO_BACKUP_FILENAME);
   }
 
@@ -238,7 +231,7 @@ const ReadingJournalStorage = (() => {
 
   return {
     KEYS,
-    autoBackupBeforeSave,
+    autoBackupAfterSave,
     exportAll,
     importAll,
     readAllData,

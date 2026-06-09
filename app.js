@@ -91,7 +91,6 @@ function loadTagColors() {
 }
 
 function saveTagColors() {
-  ReadingJournalStorage.autoBackupBeforeSave();
   localStorage.setItem(TAG_COLORS_STORAGE_KEY, JSON.stringify(tagColors));
 }
 
@@ -305,7 +304,6 @@ function applySortOrder(container) {
 }
 
 function saveBooks() {
-  ReadingJournalStorage.autoBackupBeforeSave({ force: true });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
 }
 
@@ -1224,9 +1222,10 @@ function handleDragEnd() {
     const book = books.find(b => b.id === id);
     const newStatus = getContainerStatus(targetContainer);
     const newPlanType = getContainerPlanType(targetContainer);
+    let statusChanged = false;
 
     if (book && newStatus) {
-      const statusChanged = book.status !== newStatus;
+      statusChanged = book.status !== newStatus;
       const planChanged = newStatus === 'planned'
         && newPlanType
         && newPlanType !== 'uncategorized'
@@ -1243,6 +1242,9 @@ function handleDragEnd() {
     }
 
     saveBooks();
+    if (statusChanged) {
+      ReadingJournalStorage.autoBackupAfterSave();
+    }
     dragState.didDrag = true;
 
     if (targetContainer !== sourceContainer) {
@@ -1605,6 +1607,7 @@ function handleFormSubmit(e) {
   }
 
   saveBooks();
+  ReadingJournalStorage.autoBackupAfterSave();
   render();
   bookModal.close();
 }

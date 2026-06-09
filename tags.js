@@ -25,7 +25,6 @@ function loadTagColors() {
 }
 
 function saveTagColors() {
-  ReadingJournalStorage.autoBackupBeforeSave();
   localStorage.setItem(TAG_COLORS_STORAGE_KEY, JSON.stringify(tagColors));
 }
 
