@@ -1106,6 +1106,62 @@ body {
   margin: 0;
 }
 
+.auto-backup-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+}
+
+.auto-backup-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.auto-backup-toggle-ui {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  background: var(--border);
+  border-radius: 999px;
+  transition: background 0.15s;
+}
+
+.auto-backup-toggle-ui::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s;
+}
+
+.auto-backup-toggle input:checked + .auto-backup-toggle-ui {
+  background: var(--primary);
+}
+
+.auto-backup-toggle input:checked + .auto-backup-toggle-ui::after {
+  transform: translateX(16px);
+}
+
+.auto-backup-toggle input:focus-visible + .auto-backup-toggle-ui {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.auto-backup-toggle-label {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
 .import-summary {
   margin: 0 0 12px;
   color: var(--text);

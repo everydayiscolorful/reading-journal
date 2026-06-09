@@ -23,7 +23,12 @@
         导入全部
         <input type="file" id="importAllInput" accept=".json,application/json" hidden>
       </label>
-      <p class="data-bar-hint">保存书籍或日记时会自动下载备份；修改标签颜色 3 秒内合并为一次</p>
+      <label class="auto-backup-toggle">
+        <input type="checkbox" id="autoBackupToggle" checked>
+        <span class="auto-backup-toggle-ui" aria-hidden="true"></span>
+        <span class="auto-backup-toggle-label">自动备份</span>
+      </label>
+      <p class="data-bar-hint">开启后保存时下载 reading-journal-auto-backup.json 并覆盖旧文件；修改标签颜色 3 秒内合并为一次</p>
     </section>
 
     <header class="header">

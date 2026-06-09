@@ -4,7 +4,10 @@ const ReadingJournalStorage = (() => {
     books: 'readingJournalBooks',
     diaries: 'readingJournalDiaries',
     tagColors: 'readingJournalTagColors',
+    settings: 'readingJournalSettings',
   };
+
+  const AUTO_BACKUP_FILENAME = 'reading-journal-auto-backup.json';
 
   const AUTO_BACKUP_MIN_INTERVAL_MS = 3000;
   let lastAutoBackupAt = 0;
@@ -31,6 +34,21 @@ const ReadingJournalStorage = (() => {
     localStorage.setItem(KEYS.books, JSON.stringify(books));
     localStorage.setItem(KEYS.diaries, JSON.stringify(diaries));
     localStorage.setItem(KEYS.tagColors, JSON.stringify(tagColors));
+  }
+
+  function readSettings() {
+    return readJson(KEYS.settings, { autoBackupEnabled: true });
+  }
+
+  function isAutoBackupEnabled() {
+    return readSettings().autoBackupEnabled !== false;
+  }
+
+  function setAutoBackupEnabled(enabled) {
+    localStorage.setItem(
+      KEYS.settings,
+      JSON.stringify({ ...readSettings(), autoBackupEnabled: enabled }),
+    );
   }
 
   function buildExportPayload() {
@@ -63,13 +81,12 @@ const ReadingJournalStorage = (() => {
   }
 
   function autoBackupBeforeSave({ force = false } = {}) {
+    if (!isAutoBackupEnabled()) return;
+
     const now = Date.now();
     if (!force && now - lastAutoBackupAt < AUTO_BACKUP_MIN_INTERVAL_MS) return;
     lastAutoBackupAt = now;
-    downloadJson(
-      buildExportPayload(),
-      `reading-journal-auto-backup-${formatTimestamp()}.json`,
-    );
+    downloadJson(buildExportPayload(), AUTO_BACKUP_FILENAME);
   }
 
   function exportAll() {
@@ -143,6 +160,14 @@ const ReadingJournalStorage = (() => {
     const importSummary = document.getElementById('importSummary');
     const importReplaceBtn = document.getElementById('importReplaceBtn');
     const importMergeBtn = document.getElementById('importMergeBtn');
+    const autoBackupToggle = document.getElementById('autoBackupToggle');
+
+    if (autoBackupToggle) {
+      autoBackupToggle.checked = isAutoBackupEnabled();
+      autoBackupToggle.addEventListener('change', (event) => {
+        setAutoBackupEnabled(event.target.checked);
+      });
+    }
 
     exportBtn?.addEventListener('click', exportAll);
 
