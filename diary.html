@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>读书日记</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="app-nav" aria-label="主导航">
+      <a href="index.html" class="app-nav-link">读书记录</a>
+      <a href="diary.html" class="app-nav-link active">读书日记</a>
+    </nav>
+
+    <header class="header">
+      <div class="header-inner">
+        <div class="brand">
+          <span class="brand-icon">📖</span>
+          <div>
+            <h1>读书日记</h1>
+            <p class="subtitle">记录每日阅读的心情与思考</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="addDiaryBtn">
+          <span>+</span> 写日记
+        </button>
+      </div>
+    </header>
+
+    <section class="filter-bar diary-filter-bar">
+      <div class="filter-bar-inner">
+        <span class="filter-label">筛选</span>
+        <div class="filter-controls">
+          <input type="month" id="filterMonth" aria-label="按月份筛选">
+          <select id="filterBook" aria-label="按书籍筛选">
+            <option value="">全部书籍</option>
+          </select>
+          <select id="filterTag" aria-label="按标签筛选">
+            <option value="">全部标签</option>
+          </select>
+          <input type="search" id="filterKeyword" placeholder="搜索日记内容…" aria-label="搜索日记">
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="clearDiaryFiltersBtn" hidden>清除筛选</button>
+      </div>
+      <p class="filter-summary" id="diaryFilterSummary" hidden></p>
+    </section>
+
+    <main class="diary-list" id="diaryList"></main>
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <dialog class="modal modal-fullscreen" id="diaryModal">
+    <form class="modal-content diary-form-fullscreen" id="diaryForm">
+      <div class="modal-header">
+        <h3 id="diaryModalTitle">写日记</h3>
+        <button type="button" class="btn-close" id="closeDiaryModalBtn" aria-label="关闭">&times;</button>
+      </div>
+
+      <input type="hidden" id="diaryId">
+
+      <div class="diary-form-fields">
+        <div class="form-row two-col">
+          <div>
+            <label for="diaryDate">日期 <span class="required">*</span></label>
+            <input type="date" id="diaryDate" required>
+          </div>
+          <div>
+            <label for="diaryBook">关联书籍</label>
+            <select id="diaryBook">
+              <option value="">不关联书籍</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="diaryTitle">标题</label>
+          <input type="text" id="diaryTitle" placeholder="给这篇日记起个标题（选填）">
+        </div>
+
+        <div class="form-row">
+          <label>标签</label>
+          <div class="tag-color-picker" id="diaryTagColorPicker"></div>
+          <div class="tags-input-wrap">
+            <div id="diaryTagsChips" class="tags-chips"></div>
+            <input type="text" id="diaryTagInput" list="diaryTagList" placeholder="输入标签后按回车添加">
+          </div>
+          <p class="field-hint">点击标签可切换颜色</p>
+        </div>
+
+        <datalist id="diaryTagList"></datalist>
+      </div>
+
+      <div class="form-row diary-content-row">
+        <label for="diaryContent">日记内容 <span class="required">*</span></label>
+        <textarea id="diaryContent" required placeholder="写下今天的阅读体会、摘录、疑问或灵感…"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="cancelDiaryBtn">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Detail Modal -->
+  <dialog class="modal modal-wide" id="diaryDetailModal">
+    <div class="modal-content detail-content">
+      <div class="modal-header">
+        <h3 id="diaryDetailTitle"></h3>
+        <button type="button" class="btn-close" id="closeDiaryDetailBtn" aria-label="关闭">&times;</button>
+      </div>
+      <div class="diary-detail-meta" id="diaryDetailMeta"></div>
+      <div class="diary-detail-body" id="diaryDetailBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="diaryDetailEditBtn">编辑</button>
+        <button type="button" class="btn btn-danger" id="diaryDetailDeleteBtn">删除</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="tags.js"></script>
+  <script src="diary.js"></script>
+</body>
+</html>

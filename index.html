@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的读书记录</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="app-nav" aria-label="主导航">
+      <a href="index.html" class="app-nav-link active">读书记录</a>
+      <a href="diary.html" class="app-nav-link">读书日记</a>
+    </nav>
+
+    <header class="header">
+      <div class="header-inner">
+        <div class="brand">
+          <span class="brand-icon">📚</span>
+          <div>
+            <h1>我的读书记录</h1>
+            <p class="subtitle">记录每一本书的时光与感悟</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="addBookBtn">
+          <span>+</span> 添加书籍
+        </button>
+      </div>
+    </header>
+
+    <section class="filter-bar" id="filterBar">
+      <div class="filter-bar-inner">
+        <span class="filter-label">筛选</span>
+        <div class="filter-controls">
+          <select id="filterCategory" aria-label="按类别筛选">
+            <option value="">全部类别</option>
+          </select>
+          <select id="filterAuthor" aria-label="按作者筛选">
+            <option value="">全部作者</option>
+          </select>
+          <select id="filterTag" aria-label="按标签筛选">
+            <option value="">全部标签</option>
+          </select>
+          <select id="filterPublisher" aria-label="按出版社筛选">
+            <option value="">全部出版社</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="clearFiltersBtn" hidden>清除筛选</button>
+      </div>
+      <p class="filter-summary" id="filterSummary" hidden></p>
+    </section>
+
+    <main class="board">
+      <section class="column column-finished" data-status="finished">
+        <div class="column-header finished">
+          <h2>已读完</h2>
+          <span class="count" id="count-finished">0</span>
+        </div>
+        <div class="finished-year-bar">
+          <label for="finishedYearFilter">年度</label>
+          <select id="finishedYearFilter" aria-label="按年度筛选已读书籍">
+            <option value="">全部年份</option>
+          </select>
+          <select id="exportFormat" aria-label="导出格式" disabled>
+            <option value="csv">CSV</option>
+            <option value="markdown">Markdown</option>
+            <option value="json">JSON</option>
+          </select>
+          <button type="button" class="btn btn-ghost btn-sm" id="exportYearBtn" disabled title="请先选择年度">导出</button>
+        </div>
+        <p class="finished-year-summary" id="finishedYearSummary" hidden></p>
+        <div class="book-list" id="list-finished"></div>
+      </section>
+
+      <section class="column" data-status="reading">
+        <div class="column-header reading">
+          <h2>正在读</h2>
+          <span class="count" id="count-reading">0</span>
+        </div>
+        <div class="book-list" id="list-reading"></div>
+      </section>
+
+      <section class="column column-planned" data-status="planned">
+        <div class="column-header planned">
+          <h2>计划读</h2>
+          <span class="count" id="count-planned">0</span>
+        </div>
+        <div class="plan-tabs" id="planTabs">
+          <button type="button" class="plan-tab active" data-plan-filter="">全部</button>
+          <button type="button" class="plan-tab" data-plan-filter="monthly">月读计划</button>
+          <button type="button" class="plan-tab" data-plan-filter="yearly">年度计划</button>
+          <button type="button" class="plan-tab" data-plan-filter="longterm">长期计划</button>
+        </div>
+        <div class="book-list book-list-planned" id="list-planned"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <dialog class="modal modal-wide" id="bookModal">
+    <form class="modal-content modal-content-scroll" id="bookForm">
+      <div class="modal-header">
+        <h3 id="modalTitle">添加书籍</h3>
+        <button type="button" class="btn-close" id="closeModalBtn" aria-label="关闭">&times;</button>
+      </div>
+
+      <input type="hidden" id="bookId">
+
+      <div class="form-row">
+        <label for="bookTitle">书名 <span class="required">*</span></label>
+        <input type="text" id="bookTitle" required placeholder="请输入书名">
+      </div>
+
+      <div class="form-row">
+        <label for="bookAuthor">作者</label>
+        <input type="text" id="bookAuthor" list="authorList" placeholder="请输入作者">
+      </div>
+
+      <div class="author-info-section">
+        <div class="section-label">作者信息（选填）</div>
+        <div class="form-row">
+          <label for="authorRegion">地域</label>
+          <select id="authorRegion">
+            <option value="">未选择</option>
+            <option value="china">中国</option>
+            <option value="foreign">外国</option>
+          </select>
+        </div>
+        <div id="authorChinaFields" hidden>
+          <div class="form-row">
+            <label for="dynasty">朝代</label>
+            <input type="text" id="dynasty" list="dynastyList" placeholder="如：唐代、宋代、现代">
+          </div>
+        </div>
+        <div id="authorForeignFields" hidden>
+          <div class="form-row two-col">
+            <div>
+              <label for="nationality">国籍</label>
+              <input type="text" id="nationality" list="nationalityList" placeholder="如：英国、美国、日本">
+            </div>
+            <div>
+              <label for="translator">译者</label>
+              <input type="text" id="translator" list="translatorList" placeholder="请输入译者">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row two-col">
+        <div>
+          <label for="bookCategory">类别</label>
+          <input type="text" id="bookCategory" list="categoryList" placeholder="如：文学、历史、哲学">
+        </div>
+        <div>
+          <label for="bookPublisher">出版社</label>
+          <input type="text" id="bookPublisher" list="publisherList" placeholder="请输入出版社">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>标签</label>
+        <div class="tag-color-picker" id="tagColorPicker"></div>
+        <div class="tags-input-wrap">
+          <div id="tagsChips" class="tags-chips"></div>
+          <input type="text" id="tagInput" list="tagList" placeholder="输入标签后按回车添加">
+        </div>
+        <p class="field-hint">点击标签可切换颜色</p>
+      </div>
+
+      <datalist id="categoryList"></datalist>
+      <datalist id="authorList"></datalist>
+      <datalist id="dynastyList"></datalist>
+      <datalist id="nationalityList"></datalist>
+      <datalist id="translatorList"></datalist>
+      <datalist id="tagList"></datalist>
+      <datalist id="publisherList"></datalist>
+
+      <div class="form-row">
+        <label for="bookStatus">状态</label>
+        <select id="bookStatus">
+          <option value="finished">已读完</option>
+          <option value="reading">正在读</option>
+          <option value="planned">计划读</option>
+        </select>
+      </div>
+
+      <div id="planFields" class="plan-fields" hidden>
+        <div class="form-row two-col">
+          <div>
+            <label for="planType">计划类型</label>
+            <select id="planType">
+              <option value="monthly">月读计划</option>
+              <option value="yearly">年度计划</option>
+              <option value="longterm">长期计划</option>
+            </select>
+          </div>
+          <div id="planPeriodContainer">
+            <label for="planPeriod" id="planPeriodLabel">计划月份</label>
+            <input type="month" id="planPeriod">
+          </div>
+        </div>
+      </div>
+
+      <div id="readingFields" class="reading-fields" hidden>
+        <div class="section-label">阅读记录</div>
+        <div class="form-row">
+          <label for="readCount">阅读次数</label>
+          <input type="number" id="readCount" min="1" value="1">
+        </div>
+        <div id="readingRecordsList" class="reading-records-list"></div>
+      </div>
+
+      <details class="form-section extension-section" id="extensionSection">
+        <summary>拓展信息（选填）</summary>
+        <div class="form-row">
+          <label for="adaptation">是否被影视化</label>
+          <input type="text" id="adaptation" placeholder="如：是，2020年电影《xxx》">
+        </div>
+        <div class="form-row">
+          <label for="authorBio">作者生平</label>
+          <textarea id="authorBio" rows="3" placeholder="记录作者生平简介…"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="extendedReading">拓展阅读</label>
+          <textarea id="extendedReading" rows="3" placeholder="相关书籍、文章、资料推荐…"></textarea>
+        </div>
+      </details>
+
+      <div class="form-row">
+        <label for="notes">读书感悟</label>
+        <textarea id="notes" rows="4" placeholder="写下你的阅读心得与感悟…"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="cancelBtn">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Detail Modal -->
+  <dialog class="modal modal-wide" id="detailModal">
+    <div class="modal-content detail-content">
+      <div class="modal-header">
+        <h3 id="detailTitle"></h3>
+        <button type="button" class="btn-close" id="closeDetailBtn" aria-label="关闭">&times;</button>
+      </div>
+      <div class="detail-body" id="detailBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="detailEditBtn">编辑</button>
+        <button type="button" class="btn btn-danger" id="detailDeleteBtn">删除</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
