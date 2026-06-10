@@ -79,6 +79,29 @@ function updateTagDatalist() {
     .join('');
 }
 
+function getUniqueDiaryMonths() {
+  const months = diaries
+    .map(entry => entry.date?.slice(0, 7))
+    .filter(Boolean);
+  return [...new Set(months)].sort((a, b) => b.localeCompare(a));
+}
+
+function updateMonthFilterOptions() {
+  const select = document.getElementById('filterMonth');
+  const current = diaryFilters.month;
+  let months = getUniqueDiaryMonths();
+  if (current && !months.includes(current)) {
+    months = [current, ...months];
+  }
+
+  select.innerHTML = `<option value="">全部月份</option>` +
+    months.map(month => {
+      const selected = month === current ? ' selected' : '';
+      return `<option value="${escapeHtml(month)}"${selected}>${escapeHtml(formatMonthLabel(month))}</option>`;
+    }).join('');
+  select.value = current;
+}
+
 function updateTagFilterOptions() {
   const select = document.getElementById('filterTag');
   const current = diaryFilters.tag;
@@ -211,6 +234,7 @@ function renderDiaryCard(entry) {
 }
 
 function render() {
+  updateMonthFilterOptions();
   updateBookSelectOptions();
   updateTagFilterOptions();
   updateTagDatalist();

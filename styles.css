@@ -1123,6 +1123,10 @@ body {
     box-sizing: border-box;
   }
 
+  .diary-filter-bar #filterMonth {
+    grid-column: 1 / -1;
+  }
+
   .filter-bar-inner > .btn {
     width: 100%;
     justify-content: center;
@@ -1313,8 +1317,7 @@ body {
 }
 
 /* Diary page */
-.diary-filter-bar input[type="search"],
-.diary-filter-bar input[type="month"] {
+.diary-filter-bar input[type="search"] {
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
