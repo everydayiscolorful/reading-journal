@@ -390,6 +390,34 @@ body {
   font-weight: 600;
 }
 
+.column-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.column-add-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.55);
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.column-add-btn:hover {
+  background: rgba(255, 255, 255, 0.92);
+  opacity: 1;
+}
+
 .column-header.finished {
   background: var(--finished-bg);
   color: var(--finished);
@@ -604,23 +632,30 @@ body {
 
 .book-card-drag {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  margin-top: 1px;
+  width: 32px;
+  height: 32px;
+  margin-top: 0;
   padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
   color: var(--text-muted);
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1;
   cursor: grab;
+  touch-action: none;
   opacity: 0.45;
   transition: opacity 0.15s, background 0.15s, color 0.15s;
 }
 
 .book-card:hover .book-card-drag {
   opacity: 1;
+}
+
+@media (hover: none) {
+  .book-card-drag {
+    opacity: 0.85;
+  }
 }
 
 .book-card-drag:hover {
@@ -633,8 +668,16 @@ body {
 }
 
 .book-card.is-dragging {
-  opacity: 0.45;
+  opacity: 0.55;
   box-shadow: var(--shadow);
+}
+
+.drop-marker {
+  height: 2px;
+  margin: 4px 0;
+  background: var(--primary);
+  border-radius: 1px;
+  pointer-events: none;
 }
 
 .book-list[data-sortable="on"],
@@ -1047,6 +1090,45 @@ body {
   }
 }
 
+@media (max-width: 640px) {
+  .app {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .filter-bar {
+    padding: 12px;
+  }
+
+  .filter-bar-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .filter-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .filter-controls select,
+  .filter-controls input[type="search"],
+  .filter-controls input[type="month"] {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    flex: none;
+    box-sizing: border-box;
+  }
+
+  .filter-bar-inner > .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 480px) {
   .two-col {
     grid-template-columns: 1fr;
@@ -1055,18 +1137,21 @@ body {
   .brand h1 {
     font-size: 1.4rem;
   }
-
-  .filter-controls select {
-    max-width: none;
-    min-width: 0;
-  }
 }
 
 /* App navigation */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
 .app-nav {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
   padding: 4px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1094,22 +1179,70 @@ body {
   color: #fff;
 }
 
-.data-bar {
-  display: flex;
+.data-panel-trigger {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  padding: 10px 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  gap: 6px;
+  flex-shrink: 0;
+  color: var(--text-muted);
 }
 
-.data-bar-label {
-  font-size: 0.85rem;
+.data-panel-trigger:hover {
+  color: var(--text);
+}
+
+.data-panel-trigger-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.data-panel-content {
+  max-width: 420px;
+}
+
+.data-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.data-panel-section {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-panel-section:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.data-panel-section-title {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.data-panel-toggle {
+  margin-bottom: 12px;
+}
+
+.data-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.data-panel-actions-stack {
+  flex-direction: column;
+}
+
+.data-panel-actions-stack .btn,
+.data-panel-actions-stack .import-label {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
 }
 
 .import-label {
@@ -1306,15 +1439,28 @@ body {
   min-height: 120px;
 }
 
-@media (max-width: 480px) {
-  .diary-filter-bar input[type="search"],
-  .diary-filter-bar input[type="month"] {
-    max-width: none;
+@media (max-width: 640px) {
+  .finished-year-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .finished-year-bar select,
+  .finished-year-bar .btn {
+    flex: 1 1 calc(50% - 4px);
     min-width: 0;
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-bar {
+    gap: 8px;
   }
 
   .app-nav {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
   }
 
   .app-nav-link {

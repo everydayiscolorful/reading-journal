@@ -364,12 +364,24 @@ const ReadingJournalStorage = (() => {
     const exportBtn = document.getElementById('exportAllBtn');
     const importInput = document.getElementById('importAllInput');
     const importModal = document.getElementById('importModal');
+    const dataPanelModal = document.getElementById('dataPanelModal');
+    const openDataPanelBtn = document.getElementById('openDataPanelBtn');
     const importSummary = document.getElementById('importSummary');
     const importReplaceBtn = document.getElementById('importReplaceBtn');
     const importMergeBtn = document.getElementById('importMergeBtn');
     const autoBackupToggle = document.getElementById('autoBackupToggle');
     const chooseBackupFolderBtn = document.getElementById('chooseBackupFolderBtn');
     const clearBackupFolderBtn = document.getElementById('clearBackupFolderBtn');
+
+    openDataPanelBtn?.addEventListener('click', () => {
+      dataPanelModal?.showModal();
+    });
+
+    document.querySelectorAll('[data-close-data-panel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        dataPanelModal?.close();
+      });
+    });
 
     if (autoBackupToggle) {
       autoBackupToggle.checked = isAutoBackupEnabled();
@@ -416,6 +428,7 @@ const ReadingJournalStorage = (() => {
           importSummary.textContent =
             `备份时间：${summary.exportedAt} · ${summary.bookCount} 本书 · ${summary.diaryCount} 篇日记 · ${summary.tagCount} 个标签颜色`;
         }
+        dataPanelModal?.close();
         importModal?.showModal();
       } catch {
         alert('读取文件失败，请确认文件格式正确。');

@@ -11,26 +11,16 @@
 </head>
 <body>
   <div class="app">
-    <nav class="app-nav" aria-label="主导航">
-      <a href="index.html" class="app-nav-link">读书记录</a>
-      <a href="diary.html" class="app-nav-link active">读书日记</a>
-    </nav>
-
-    <section class="data-bar" aria-label="数据管理">
-      <span class="data-bar-label">数据</span>
-      <button type="button" class="btn btn-ghost btn-sm" id="exportAllBtn">导出全部</button>
-      <label class="btn btn-ghost btn-sm import-label">
-        导入全部
-        <input type="file" id="importAllInput" accept=".json,application/json" hidden>
-      </label>
-      <label class="auto-backup-toggle">
-        <input type="checkbox" id="autoBackupToggle" checked>
-        <span class="auto-backup-toggle-ui" aria-hidden="true"></span>
-        <span class="auto-backup-toggle-label">自动备份</span>
-      </label>
-      <button type="button" class="btn btn-ghost btn-sm" id="chooseBackupFolderBtn">自定义下载路径</button>
-      <button type="button" class="btn btn-ghost btn-sm" id="clearBackupFolderBtn" hidden>恢复为浏览器默认下载目录</button>
-    </section>
+    <div class="top-bar">
+      <nav class="app-nav" aria-label="主导航">
+        <a href="index.html" class="app-nav-link">读书记录</a>
+        <a href="diary.html" class="app-nav-link active">读书日记</a>
+      </nav>
+      <button type="button" class="btn btn-ghost btn-sm data-panel-trigger" id="openDataPanelBtn" aria-haspopup="dialog">
+        <span class="data-panel-trigger-icon" aria-hidden="true">⚙</span>
+        数据与备份
+      </button>
+    </div>
 
     <header class="header">
       <div class="header-inner">
@@ -137,6 +127,42 @@
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" id="diaryDetailEditBtn">编辑</button>
         <button type="button" class="btn btn-danger" id="diaryDetailDeleteBtn">删除</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Data Panel Modal -->
+  <dialog class="modal" id="dataPanelModal">
+    <div class="modal-content data-panel-content">
+      <div class="modal-header">
+        <h3>数据与备份</h3>
+        <button type="button" class="btn-close" data-close-data-panel aria-label="关闭">&times;</button>
+      </div>
+
+      <div class="data-panel-body">
+        <section class="data-panel-section">
+          <h4 class="data-panel-section-title">自动备份</h4>
+          <label class="auto-backup-toggle data-panel-toggle">
+            <input type="checkbox" id="autoBackupToggle" checked>
+            <span class="auto-backup-toggle-ui" aria-hidden="true"></span>
+            <span class="auto-backup-toggle-label">保存书籍或日记时自动备份</span>
+          </label>
+          <div class="data-panel-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="chooseBackupFolderBtn">自定义下载路径</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="clearBackupFolderBtn" hidden>恢复为浏览器默认下载目录</button>
+          </div>
+        </section>
+
+        <section class="data-panel-section">
+          <h4 class="data-panel-section-title">导入与导出</h4>
+          <div class="data-panel-actions data-panel-actions-stack">
+            <button type="button" class="btn btn-ghost" id="exportAllBtn">导出全部数据</button>
+            <label class="btn btn-ghost import-label">
+              导入全部数据
+              <input type="file" id="importAllInput" accept=".json,application/json" hidden>
+            </label>
+          </div>
+        </section>
       </div>
     </div>
   </dialog>

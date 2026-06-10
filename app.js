@@ -57,7 +57,20 @@ let filters = {
 };
 let plannedPlanFilter = '';
 let finishedYearFilter = '';
-let dragState = { id: null, sourceContainer: null, didDrag: false };
+let dragState = {
+  id: null,
+  sourceContainer: null,
+  didDrag: false,
+  card: null,
+  pointerId: null,
+  active: false,
+  startX: 0,
+  startY: 0,
+  targetContainer: null,
+  lastClientY: 0,
+};
+
+const DRAG_MOVE_THRESHOLD = 8;
 let formReadingRecords = [];
 let formTags = [];
 let selectedTagColor = 'purple';
@@ -1015,7 +1028,7 @@ function renderBookCard(book, options = {}) {
   return `
     <article class="book-card" data-id="${book.id}">
       <div class="book-card-top">
-        <button type="button" class="book-card-drag" draggable="true" aria-label="拖动排序" title="拖动排序">⠿</button>
+        <button type="button" class="book-card-drag" aria-label="拖动排序" title="拖动排序">⠿</button>
         <h3 class="book-card-title">${escapeHtml(book.title)}</h3>
       </div>
       ${authorLine}
@@ -1070,6 +1083,7 @@ function clearDropHighlights() {
   document.querySelectorAll('.column.drop-highlight').forEach(el => {
     el.classList.remove('drop-highlight');
   });
+  clearDropMarker();
 }
 
 function prepareContainerForDrop(container) {
@@ -1153,76 +1167,90 @@ function updateBookStatusOnMove(book, newStatus, targetPlanType) {
   );
 }
 
-function handleDragStart(e) {
-  if (hasActiveFilters()) return;
-  const handle = e.target.closest('.book-card-drag');
-  if (!handle) return;
-
-  const card = handle.closest('.book-card');
-  const container = card.closest(DROP_CONTAINER_SELECTOR);
-  if (!container || container.dataset.sortable === 'off') return;
-
-  dragState = {
-    id: card.dataset.id,
-    sourceContainer: container,
-    didDrag: false,
-  };
-
-  card.classList.add('is-dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', card.dataset.id);
+function clearDropMarker() {
+  document.querySelectorAll('.drop-marker').forEach(el => el.remove());
 }
 
-function handleDragOver(e) {
-  if (hasActiveFilters() || !dragState.id) return;
+function updateDropMarker(container, clientY) {
+  clearDropMarker();
+  if (!container) return;
 
-  let container = findDropContainer(e.target);
-  if (!container || container.dataset.sortable === 'off') return;
+  const afterElement = getDragAfterElement(container, clientY);
+  const marker = document.createElement('div');
+  marker.className = 'drop-marker';
+  marker.setAttribute('aria-hidden', 'true');
 
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
+  if (afterElement) {
+    container.insertBefore(marker, afterElement);
+  } else {
+    container.appendChild(marker);
+  }
+}
+
+function applyDropPosition(book, container, clientY) {
+  const status = getContainerStatus(container);
+  if (!status) return;
+
+  let planType = getContainerPlanType(container);
+  if (status === 'planned' && !planType) {
+    planType = getBookPlanGroup(book);
+  }
+
+  const cards = [...container.querySelectorAll('.book-card:not(.is-dragging)')];
+  const afterElement = getDragAfterElement(container, clientY);
+  let targetIndex = afterElement ? cards.indexOf(afterElement) : cards.length;
+  if (targetIndex < 0) targetIndex = cards.length;
+
+  const groupKey = status === 'planned' && planType === 'uncategorized'
+    ? 'uncategorized'
+    : planType;
+  let groupBooks = sortByOrder(getBooksInSortGroup(status, groupKey));
+  groupBooks = groupBooks.filter(b => b.id !== book.id);
+  groupBooks.splice(targetIndex, 0, book);
+  groupBooks.forEach((b, index) => {
+    b.sortOrder = index;
+  });
+}
+
+function updateDragPosition(clientX, clientY) {
+  if (!dragState.id || !dragState.card) return;
+
+  dragState.lastClientY = clientY;
+
+  const card = dragState.card;
+  card.style.pointerEvents = 'none';
+  const under = document.elementFromPoint(clientX, clientY);
+  card.style.pointerEvents = '';
+
+  const container = findDropContainer(under);
+  if (!container || container.dataset.sortable === 'off') {
+    clearDropHighlights();
+    dragState.targetContainer = null;
+    return;
+  }
+
+  dragState.targetContainer = container;
 
   clearDropHighlights();
   container.classList.add('drop-target-active');
   container.closest('.column')?.classList.add('drop-highlight');
-
   prepareContainerForDrop(container);
-
-  const card = document.querySelector(`.book-card[data-id="${dragState.id}"]`);
-  if (!card) return;
-
-  const afterElement = getDragAfterElement(container, e.clientY);
-  if (afterElement) {
-    container.insertBefore(card, afterElement);
-  } else {
-    container.appendChild(card);
-  }
+  updateDropMarker(container, clientY);
 }
 
-function handleDrop(e) {
-  if (hasActiveFilters() || !dragState.id) return;
-  const container = findDropContainer(e.target);
-  if (!container) return;
-  e.preventDefault();
-  dragState.didDrag = true;
-}
-
-function handleDragEnd() {
-  const { id, sourceContainer } = dragState;
-
+function finalizeDrag(id, sourceContainer) {
   clearDropHighlights();
   document.querySelectorAll('.book-card.is-dragging').forEach(el => {
     el.classList.remove('is-dragging');
   });
 
-  const card = document.querySelector(`.book-card[data-id="${id}"]`);
-  const targetContainer = card?.closest(DROP_CONTAINER_SELECTOR);
+  const targetContainer = dragState.targetContainer || sourceContainer;
+  let statusChanged = false;
 
   if (id && targetContainer && !hasActiveFilters()) {
     const book = books.find(b => b.id === id);
     const newStatus = getContainerStatus(targetContainer);
     const newPlanType = getContainerPlanType(targetContainer);
-    let statusChanged = false;
 
     if (book && newStatus) {
       statusChanged = book.status !== newStatus;
@@ -1234,11 +1262,8 @@ function handleDragEnd() {
       if (statusChanged || planChanged) {
         updateBookStatusOnMove(book, newStatus, newPlanType);
       }
-    }
 
-    applySortOrder(targetContainer);
-    if (sourceContainer && sourceContainer !== targetContainer) {
-      applySortOrder(sourceContainer);
+      applyDropPosition(book, targetContainer, dragState.lastClientY);
     }
 
     saveBooks();
@@ -1246,19 +1271,103 @@ function handleDragEnd() {
       ReadingJournalStorage.autoBackupAfterSave();
     }
     dragState.didDrag = true;
-
-    if (targetContainer !== sourceContainer) {
-      render();
-    }
+    render();
   } else if (id && targetContainer) {
-    applySortOrder(targetContainer);
+    const book = books.find(b => b.id === id);
+    if (book) {
+      applyDropPosition(book, targetContainer, dragState.lastClientY);
+    }
     saveBooks();
     dragState.didDrag = true;
+    render();
   }
 
   setTimeout(() => {
-    dragState = { id: null, sourceContainer: null, didDrag: false };
+    dragState = {
+      id: null,
+      sourceContainer: null,
+      didDrag: false,
+      card: null,
+      pointerId: null,
+      active: false,
+      startX: 0,
+      startY: 0,
+      targetContainer: null,
+      lastClientY: 0,
+    };
   }, 0);
+}
+
+function handlePointerDown(e) {
+  if (hasActiveFilters()) return;
+  const handle = e.target.closest('.book-card-drag');
+  if (!handle) return;
+
+  const card = handle.closest('.book-card');
+  const container = card?.closest(DROP_CONTAINER_SELECTOR);
+  if (!container || container.dataset.sortable === 'off') return;
+
+  dragState = {
+    id: card.dataset.id,
+    sourceContainer: container,
+    didDrag: false,
+    card,
+    pointerId: e.pointerId,
+    active: false,
+    startX: e.clientX,
+    startY: e.clientY,
+    targetContainer: container,
+    lastClientY: e.clientY,
+  };
+
+  handle.setPointerCapture(e.pointerId);
+}
+
+function handlePointerMove(e) {
+  if (!dragState.id || e.pointerId !== dragState.pointerId) return;
+
+  if (!dragState.active) {
+    const dx = e.clientX - dragState.startX;
+    const dy = e.clientY - dragState.startY;
+    if (Math.hypot(dx, dy) < DRAG_MOVE_THRESHOLD) return;
+    dragState.active = true;
+    dragState.card.classList.add('is-dragging');
+  }
+
+  if (hasActiveFilters()) return;
+  e.preventDefault();
+  updateDragPosition(e.clientX, e.clientY);
+}
+
+function handlePointerUp(e) {
+  if (!dragState.id || e.pointerId !== dragState.pointerId) return;
+
+  const { id, sourceContainer, active, card } = dragState;
+  const handle = card?.querySelector('.book-card-drag');
+
+  try {
+    handle?.releasePointerCapture(e.pointerId);
+  } catch {
+    // Ignore release errors when capture was already lost.
+  }
+
+  if (active) {
+    finalizeDrag(id, sourceContainer);
+    return;
+  }
+
+  dragState = {
+    id: null,
+    sourceContainer: null,
+    didDrag: false,
+    card: null,
+    pointerId: null,
+    active: false,
+    startX: 0,
+    startY: 0,
+    targetContainer: null,
+    lastClientY: 0,
+  };
 }
 
 function renderPlannedColumn(statusBooks) {
@@ -1354,13 +1463,16 @@ function render() {
   setupDragAndDrop();
 }
 
-function openAddModal(status = 'reading') {
+function openAddModal(status = 'reading', { planType } = {}) {
   document.getElementById('modalTitle').textContent = '添加书籍';
   bookForm.reset();
   document.getElementById('bookId').value = '';
   document.getElementById('bookStatus').value = status;
   document.getElementById('readCount').value = 1;
-  document.getElementById('planType').value = 'monthly';
+  const resolvedPlanType = status === 'planned'
+    ? (planType || plannedPlanFilter || 'monthly')
+    : 'monthly';
+  document.getElementById('planType').value = resolvedPlanType;
   formReadingRecords = [defaultReadingRecord()];
   formTags = [];
   selectedTagColor = 'purple';
@@ -1369,7 +1481,7 @@ function openAddModal(status = 'reading') {
   document.getElementById('authorRegion').value = '';
   toggleAuthorInfoFields();
   document.getElementById('extensionSection').open = false;
-  renderPlanPeriodInput('monthly');
+  renderPlanPeriodInput(resolvedPlanType);
   toggleFormSections();
   updateDatalists();
   bookModal.showModal();
@@ -1644,7 +1756,15 @@ function handleRecordInput(e) {
   }
 }
 
-document.getElementById('addBookBtn').addEventListener('click', () => openAddModal());
+document.getElementById('addBookBtn').addEventListener('click', () => openAddModal('reading'));
+document.querySelector('.board').addEventListener('click', (e) => {
+  const columnAddBtn = e.target.closest('.column-add-btn');
+  if (!columnAddBtn) return;
+  const status = columnAddBtn.dataset.addStatus;
+  openAddModal(status, {
+    planType: status === 'planned' ? plannedPlanFilter || undefined : undefined,
+  });
+});
 document.getElementById('closeModalBtn').addEventListener('click', () => bookModal.close());
 document.getElementById('cancelBtn').addEventListener('click', () => bookModal.close());
 document.getElementById('closeDetailBtn').addEventListener('click', () => detailModal.close());
@@ -1750,10 +1870,10 @@ document.querySelector('.board').addEventListener('click', (e) => {
   if (card) openDetailModal(card.dataset.id);
 });
 
-document.querySelector('.board').addEventListener('dragstart', handleDragStart);
-document.querySelector('.board').addEventListener('dragover', handleDragOver);
-document.querySelector('.board').addEventListener('drop', handleDrop);
-document.querySelector('.board').addEventListener('dragend', handleDragEnd);
+document.querySelector('.board').addEventListener('pointerdown', handlePointerDown);
+document.querySelector('.board').addEventListener('pointermove', handlePointerMove, { passive: false });
+document.querySelector('.board').addEventListener('pointerup', handlePointerUp);
+document.querySelector('.board').addEventListener('pointercancel', handlePointerUp);
 
 loadBooks();
 render();
