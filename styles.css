@@ -225,6 +225,21 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  flex: 1 1 100%;
+}
+
+.tags-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.tag-add-btn {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  min-height: 32px;
 }
 
 .tag-chip {
@@ -254,9 +269,10 @@ body {
   opacity: 1;
 }
 
-#tagInput {
+#tagInput,
+#diaryTagInput {
   flex: 1;
-  min-width: 120px;
+  min-width: 0;
   border: none;
   outline: none;
   font-family: inherit;
@@ -1091,13 +1107,6 @@ body {
 .data-bar-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-muted);
-}
-
-.data-bar-hint {
-  margin: 0;
-  flex: 1 1 220px;
-  font-size: 0.78rem;
   color: var(--text-muted);
 }
 

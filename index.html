@@ -28,7 +28,8 @@
         <span class="auto-backup-toggle-ui" aria-hidden="true"></span>
         <span class="auto-backup-toggle-label">自动备份</span>
       </label>
-      <p class="data-bar-hint">开启后，在书籍/日记弹窗点击「保存」，或拖拽书籍到其他状态栏时下载 reading-journal-auto-backup.json</p>
+      <button type="button" class="btn btn-ghost btn-sm" id="chooseBackupFolderBtn">自定义下载路径</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="clearBackupFolderBtn" hidden>恢复为浏览器默认下载目录</button>
     </section>
 
     <header class="header">
@@ -180,9 +181,12 @@
         <div class="tag-color-picker" id="tagColorPicker"></div>
         <div class="tags-input-wrap">
           <div id="tagsChips" class="tags-chips"></div>
-          <input type="text" id="tagInput" list="tagList" placeholder="输入标签后按回车添加">
+          <div class="tags-input-row">
+            <input type="text" id="tagInput" list="tagList" placeholder="输入标签">
+            <button type="button" class="btn btn-ghost btn-sm tag-add-btn" id="addTagBtn">添加</button>
+          </div>
         </div>
-        <p class="field-hint">点击标签可切换颜色</p>
+        <p class="field-hint">点击「添加」或按回车创建标签；点击标签可切换颜色</p>
       </div>
 
       <datalist id="categoryList"></datalist>

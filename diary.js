@@ -348,6 +348,10 @@ document.getElementById('diaryTagInput').addEventListener('keydown', (e) => {
   }
 });
 
+document.getElementById('addDiaryTagBtn').addEventListener('click', () => {
+  addFormTag(document.getElementById('diaryTagInput').value);
+});
+
 document.getElementById('diaryTagsChips').addEventListener('click', (e) => {
   const btn = e.target.closest('.tag-chip-remove');
   if (btn) {

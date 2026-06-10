@@ -1661,6 +1661,10 @@ document.getElementById('tagInput').addEventListener('keydown', (e) => {
   }
 });
 
+document.getElementById('addTagBtn').addEventListener('click', () => {
+  addFormTag(document.getElementById('tagInput').value);
+});
+
 document.getElementById('tagsChips').addEventListener('click', (e) => {
   const btn = e.target.closest('.tag-chip-remove');
   if (btn) {
