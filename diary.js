@@ -341,16 +341,11 @@ document.getElementById('closeDiaryDetailBtn').addEventListener('click', () => d
 document.getElementById('clearDiaryFiltersBtn').addEventListener('click', clearDiaryFilters);
 diaryForm.addEventListener('submit', handleDiarySubmit);
 
-document.getElementById('diaryTagInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    addFormTag(e.target.value);
-  }
-});
-
-document.getElementById('addDiaryTagBtn').addEventListener('click', () => {
-  addFormTag(document.getElementById('diaryTagInput').value);
-});
+ReadingJournalStorage.bindTagInputCommit(
+  document.getElementById('diaryTagInput'),
+  document.getElementById('addDiaryTagBtn'),
+  (value) => addFormTag(value),
+);
 
 document.getElementById('diaryTagsChips').addEventListener('click', (e) => {
   const btn = e.target.closest('.tag-chip-remove');

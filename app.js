@@ -1654,16 +1654,11 @@ bookForm.addEventListener('submit', handleFormSubmit);
 document.getElementById('bookStatus').addEventListener('change', toggleFormSections);
 document.getElementById('authorRegion').addEventListener('change', toggleAuthorInfoFields);
 
-document.getElementById('tagInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    addFormTag(e.target.value);
-  }
-});
-
-document.getElementById('addTagBtn').addEventListener('click', () => {
-  addFormTag(document.getElementById('tagInput').value);
-});
+ReadingJournalStorage.bindTagInputCommit(
+  document.getElementById('tagInput'),
+  document.getElementById('addTagBtn'),
+  (value) => addFormTag(value),
+);
 
 document.getElementById('tagsChips').addEventListener('click', (e) => {
   const btn = e.target.closest('.tag-chip-remove');

@@ -325,6 +325,41 @@ const ReadingJournalStorage = (() => {
     return { bookCount, diaryCount, tagCount, exportedAt };
   }
 
+  function bindTagInputCommit(inputEl, buttonEl, onCommit) {
+    if (!inputEl || !buttonEl || typeof onCommit !== 'function') return;
+
+    const commit = () => onCommit(inputEl.value);
+
+    // Keep focus on input so mobile IME text is not lost before commit.
+    buttonEl.addEventListener('mousedown', (event) => event.preventDefault());
+    buttonEl.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'touch') event.preventDefault();
+    });
+
+    let touchCommitted = false;
+    buttonEl.addEventListener('touchend', (event) => {
+      event.preventDefault();
+      touchCommitted = true;
+      commit();
+      window.setTimeout(() => {
+        touchCommitted = false;
+      }, 500);
+    }, { passive: false });
+
+    buttonEl.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (touchCommitted) return;
+      commit();
+    });
+
+    inputEl.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        commit();
+      }
+    });
+  }
+
   function initUI() {
     const exportBtn = document.getElementById('exportAllBtn');
     const importInput = document.getElementById('importAllInput');
@@ -434,5 +469,6 @@ const ReadingJournalStorage = (() => {
     exportAll,
     importAll,
     readAllData,
+    bindTagInputCommit,
   };
 })();

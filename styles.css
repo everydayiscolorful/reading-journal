@@ -238,8 +238,10 @@ body {
 
 .tag-add-btn {
   flex-shrink: 0;
-  padding: 4px 12px;
-  min-height: 32px;
+  padding: 8px 14px;
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
 }
 
 .tag-chip {
